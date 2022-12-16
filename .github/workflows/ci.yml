@@ -19,12 +19,8 @@ jobs:
            - version-1-6
            - devel
 
-    defaults:
-      run:
-        shell: ${{ matrix.shell }}
-
     name: '${{ matrix.os }} (Nim ${{ matrix.nim }})'
-    runs-on: ${{ matrix.builder }}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -32,10 +28,8 @@ jobs:
         with:
           nim-version: ${{ matrix.nim }}
 
+      - name: Check build
+        run: nimble install -y
+
       - name: Run tests
-        shell: bash
-        run: |
-          nim --version
-          nimble --version
-          nimble install -y --depsOnly
-          nimble test
+        run: nimble test
