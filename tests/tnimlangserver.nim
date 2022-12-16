@@ -35,8 +35,7 @@ suite "Client/server initialization sequence":
         capabilities: ClientCapabilities())
 
     let initializeResult = waitFor client.call("initialize", %initParams)
-    doAssert initializeResult != nil;
-
+    check initializeResult != nil
     client.notify("initialized", newJObject())
 
   pipeClient.close()
@@ -143,26 +142,26 @@ suite "Suggest API selection":
   test "Suggest api":
     client.notify("textDocument/didOpen", %createDidOpenParams("projects/hw/hw.nim"))
     let (_, params) = suggestInit.read.waitFor
-    doAssert %params ==
+    check %params ==
       %ProgressParams(
         token: fmt "Creating nimsuggest for {uriToPath(helloWorldUri)}")
-    doAssert "begin" == progress.read.waitFor[1].value.get()["kind"].getStr
-    doAssert "end" == progress.read.waitFor[1].value.get()["kind"].getStr
+    check "begin" == progress.read.waitFor[1].value.get()["kind"].getStr
+    check "end" == progress.read.waitFor[1].value.get()["kind"].getStr
     client.notify("textDocument/didOpen",
                   %createDidOpenParams("projects/hw/useRoot.nim"))
     let
       rootNimFileUri = "projects/hw/root.nim".fixtureUri.uriToPath
       rootParams2 = suggestInit.read.waitFor[1]
 
-    doAssert %rootParams2 ==
+    check %rootParams2 ==
       %ProgressParams(token: fmt "Creating nimsuggest for {rootNimFileUri}")
 
-    doAssert "begin" == progress.read.waitFor[1].value.get()["kind"].getStr
-    doAssert "end" == progress.read.waitFor[1].value.get()["kind"].getStr
+    check "begin" == progress.read.waitFor[1].value.get()["kind"].getStr
+    check "end" == progress.read.waitFor[1].value.get()["kind"].getStr
     let
       hoverParams = positionParams("projects/hw/hw.nim".fixtureUri, 2, 0)
       hover = client.call("textDocument/hover", %hoverParams).waitFor
-    doAssert hover.kind == JNull
+    check hover.kind == JNull
 
 
 suite "LSP features":
@@ -232,13 +231,13 @@ suite "LSP features":
         ],
         "range": nil
       }
-    doAssert %hover == %expected
+    check %hover == %expected
 
   test "Sending hover(no content)":
     let
       hoverParams = positionParams( helloWorldUri, 2, 0)
       hover = client.call("textDocument/hover", %hoverParams).waitFor
-    doAssert hover.kind == JNull
+    check hover.kind == JNull
 
   test "Definitions.":
     let
@@ -258,7 +257,7 @@ suite "LSP features":
           }
         }
       }]
-    doAssert %locations == %expected
+    check %locations == %expected
 
   test "References.":
     let referenceParams = ReferenceParams %* {
@@ -300,7 +299,7 @@ suite "LSP features":
         }
       }
     }]
-    doAssert %locations == %expected
+    check %locations == %expected
 
   test "References(exclude def)":
     let referenceParams =  ReferenceParams %* {
@@ -331,7 +330,7 @@ suite "LSP features":
         }
       }
     }]
-    doAssert %locations == %expected
+    check %locations == %expected
 
   test "didChange then sending hover.":
     let didChangeParams = DidChangeTextDocumentParams %* {
@@ -360,7 +359,7 @@ suite "LSP features":
         "range": nil
       }
 
-    doAssert %hover == %expected
+    check %hover == %expected
 
   test "Completion":
     let completionParams = CompletionParams %* {
@@ -383,10 +382,10 @@ suite "LSP features":
       "detail": "proc (x: varargs[typed]){.gcsafe, locks: 0.}",
     }
 
-    doAssert actualEchoCompletionItem.label == expected.label
-    doAssert actualEchoCompletionItem.kind == expected.kind
-    doAssert actualEchoCompletionItem.detail == expected.detail
-    doAssert actualEchoCompletionItem.documentation != expected.documentation
+    check actualEchoCompletionItem.label == expected.label
+    check actualEchoCompletionItem.kind == expected.kind
+    check actualEchoCompletionItem.detail == expected.detail
+    check actualEchoCompletionItem.documentation != expected.documentation
 
   pipeClient.close()
   pipeServer.close()
@@ -430,4 +429,4 @@ suite "Null configuration:":
     client.notify("textDocument/didOpen", %createDidOpenParams("projects/hw/hw.nim"))
     let hoverParams = positionParams("projects/hw/hw.nim".fixtureUri, 2, 0)
     let hover = client.call("textDocument/hover", %hoverParams).waitFor
-    doAssert hover.kind == JNull
+    check hover.kind == JNull
