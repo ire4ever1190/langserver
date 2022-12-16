@@ -17,6 +17,12 @@ import
 proc fixtureUri(path: string): string =
   result = pathToUri(getCurrentDir() / "tests" / path)
 
+when (NimMajor, NimMinor, NimPatch) < (1, 7, 0):
+  const defPragmas = "{.noSideEffect, gcsafe, locks: 0.}"
+else:
+  const defPragmas = "{.noSideEffect, gcsafe.}"
+
+
 suite "Client/server initialization sequence":
   let pipeServer = createPipe();
   let pipeClient = createPipe();
@@ -226,7 +232,7 @@ suite "LSP features":
       expected = Hover %* {
         "contents": [{
             "language": "nim",
-            "value": "hw.a: proc (){.noSideEffect, gcsafe, locks: 0.}"
+            "value": "hw.a: proc ()" & defPragmas
           }
         ],
         "range": nil
@@ -353,7 +359,7 @@ suite "LSP features":
       expected = Hover %* {
         "contents": [{
             "language": "nim",
-            "value": "hw.a: proc (){.noSideEffect, gcsafe, locks: 0.}"
+            "value": "hw.a: proc ()" & defPragmas
           }
         ],
         "range": nil
